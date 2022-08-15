@@ -22,6 +22,12 @@ class Cell
   def dead!
     @state = dead
   end
+
+  def next_state(neighbors)
+    @next_state = :dead
+    @next_state = :alive if neighbors == 3
+    @next_state = :alive if neighbors.between?(2, 3)
+  end
 end
 
 class Grid
@@ -36,7 +42,45 @@ class Grid
       puts row.join(' ')
     end
   end
+
+  def check_neighbors(col, row)
+    neighbors = 0
+    directions = [
+      [col - 1, row - 1], # upper left neighbor
+      [col, row - 1], # upper middle
+      [col + 1, row - 1], # upper right
+      [col - 1, row], # left
+      [col + 1, row], # right
+      [col - 1, row + 1], # bottom left
+      [col, row + 1], # bottom middle
+      [col + 1, row + 1] # bottom right
+    ]
+
+    directions.each do |col, row|
+      if col >= 0 && col < @array.length && row >= 0 && row < @array[col].length && @array[col][row].alive?
+        neighbors += 1
+      end
+    end
+  end
+
+  def new_grid
+    @grid.each do |element|
+      element.each do |cell|
+        cell.next_state(check_neighbors(cell.col, cell.row))
+      end
+    end
+  end
 end
 
-grid_instance = Grid.new(5, 5)
-grid_instance.print_grid
+class Game
+  def initialize
+    puts 'Ingresa el número de columnas'
+    @column = gets.chomp.to_i
+    puts 'Ingresa el número de filas'
+    @row = gets.chomp.to_i
+    @grid = Grid.new(@column, @row)
+    @grid.print_grid
+  end
+end
+
+Game.new
