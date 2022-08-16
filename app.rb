@@ -3,24 +3,24 @@
 class Cell
   attr_accessor :state
 
-  def initialize
-    @state = string
+  def initialize(state)
+    @state = state 
   end
 
-  def string
+  def to_s
     @state == :alive ? '*' : '.'
   end
 
   def alive?
-    @state == alive
+    @state == :alive
   end
 
   def alive!
-    @state = alive
+    @state = :alive
   end
 
   def dead!
-    @state = dead
+    @state = :dead
   end
 
   def next_state(neighbors)
@@ -34,13 +34,16 @@ class Grid
   attr_accessor :column, :row
 
   def initialize(row, column)
-    @grid = Array.new(row, Array.new(column) { Cell.new.string })
-  end
+    @grid = Array.new(row) { Array.new(column) { rand(1...100).between?(70, 100) ? Cell.new(:alive) : Cell.new(:dead)} }
+  end  
 
-  def print_grid
-    @grid.each do |row|
-      puts row.join(' ')
-    end
+  def print_grid 
+    @grid.each do |row| 
+    row.each do |cell| 
+    print cell.to_s 
+    end 
+    puts 
+    end 
   end
 
   def check_neighbors(col, row)
@@ -78,7 +81,7 @@ class Game
     @column = gets.chomp.to_i
     puts 'Ingresa el número de filas'
     @row = gets.chomp.to_i
-    @grid = Grid.new(@column, @row)
+    @grid = Grid.new(@row, @column)
     @grid.print_grid
   end
 end
