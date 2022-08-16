@@ -3,12 +3,18 @@
 class Cell
   attr_accessor :state
 
-  def initialize(state)
-    @state = state 
+  def initialize(state, row, col)
+    @state = state
+    @row = row
+    @col = col
   end
 
   def to_s
     @state == :alive ? '*' : '.'
+  end
+
+  def next_state_to_s
+    @next_state == :alive ? '*' : '.'
   end
 
   def alive?
@@ -23,6 +29,8 @@ class Cell
     @state = :dead
   end
 
+  attr_reader :col, :row
+
   def next_state(neighbors)
     @next_state = :dead
     @next_state = :alive if neighbors == 3
@@ -34,19 +42,24 @@ class Grid
   attr_accessor :column, :row
 
   def initialize(row, column)
-    @grid = Array.new(row) { Array.new(column) { rand(1...100).between?(70, 100) ? Cell.new(:alive) : Cell.new(:dead)} }
-  end  
-
-  def print_grid 
-    @grid.each do |row| 
-    row.each do |cell| 
-    print cell.to_s 
-    end 
-    puts 
-    end 
+    @grid = Array.new(row) do
+      Array.new(column) do
+        rand(1...100).between?(70, 100) ? Cell.new(:alive, row, column) : Cell.new(:dead, row, column)
+      end
+    end
   end
 
-  def check_neighbors(col, row)
+  def print_grid
+    puts 'Old Grid'
+    @grid.each do |row|
+      row.each do |cell|
+        print cell.to_s
+      end
+      puts
+    end
+  end
+
+  def check_neighbors(row, col)
     neighbors = 0
     directions = [
       [col - 1, row - 1], # upper left neighbor
@@ -59,18 +72,34 @@ class Grid
       [col + 1, row + 1] # bottom right
     ]
 
-    directions.each do |col, row|
-      if col >= 0 && col < @array.length && row >= 0 && row < @array[col].length && @array[col][row].alive?
+    directions.each do |cols, rows|
+      if cols >= 0 && cols < @grid.length && rows >= 0 && rows < @grid[cols].length && @grid[rows][cols].alive?
         neighbors += 1
       end
     end
+    neighbors
   end
 
   def new_grid
+    fil = 0
     @grid.each do |element|
+      col = 0
       element.each do |cell|
-        cell.next_state(check_neighbors(cell.col, cell.row))
+        cell.next_state(check_neighbors(fil, col))
+
+        col += 1
       end
+      fil += 1
+    end
+  end
+
+  def print_new_grid
+    puts 'New Grid'
+    @grid.each do |row|
+      row.each do |cell|
+        print cell.next_state_to_s
+      end
+      puts
     end
   end
 end
@@ -83,6 +112,8 @@ class Game
     @row = gets.chomp.to_i
     @grid = Grid.new(@row, @column)
     @grid.print_grid
+    @grid.new_grid
+    @grid.print_new_grid
   end
 end
 
